@@ -59,8 +59,8 @@ class PitStop(SceneMixin, AttachmentMixin, MotionMixin, GUIMixin, SequenceMixin)
         abb.base = SE3(front_hub[0] + 0.35, -1.6, 0) * SE3.Rz(np.pi / 2)
         staubli.base = SE3(front_hub[0] - 0.7, -1.75, 0) * SE3.Rz(np.pi / 2)
 
-        # Lollipop marshal robot, positioned at the front of the pit box.
-        self.ur3e.set_base(SE3(3.16, 1.16, 0.62))
+        # Lollipop marshal robot. Offset from the KUKA lifter so its return sweep clears the lifting arm.
+        self.ur3e.set_base(SE3(3.74, 1.40, 0.62))
         car_min_x = car.mesh_point([0, 0, car.centre[2]])[0]
         car_max_x = car.mesh_point([299.2, 0, car.centre[2]])[0]
         self.ur3e_car_box = (
@@ -83,6 +83,7 @@ class PitStop(SceneMixin, AttachmentMixin, MotionMixin, GUIMixin, SequenceMixin)
         staubli.q = self.staubli_home.copy()
 
         self.build_floor_and_stands()
+        self.build_emergency_stop_table()
 
         self.setup_attachments()
         self.collision_manager.extra_obstacles = self.all_extra_obstacles

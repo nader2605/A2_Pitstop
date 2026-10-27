@@ -2,6 +2,7 @@
 # 41013 Industrial Robotics - Lab Assignment 2
 
 import numpy as np
+from pathlib import Path
 import spatialgeometry as sg
 from spatialmath import SE3
 
@@ -40,6 +41,46 @@ class SceneMixin:
                     color=tyre_stand_grey
                 )
             )
+
+    def build_emergency_stop_table(self):
+        """Visible, stationary E-stop near the UR3e; B remains the actual stop input."""
+        # Keep clear of the UR3e pedestal and its sweeping arm.
+        # The tabletop is 0.76 m above the floor.
+        centre_x, centre_y = 4.40, 1.45
+        table_height = 0.76
+        top_thickness = 0.05
+        grey = [0.37, 0.40, 0.44, 1]
+        self.estop_table_shapes = [
+            sg.Cuboid(
+                [0.58, 0.46, top_thickness],
+                pose=SE3(centre_x, centre_y, table_height - top_thickness / 2),
+                color=grey
+            )
+        ]
+        for dx in (-0.24, 0.24):
+            for dy in (-0.18, 0.18):
+                self.estop_table_shapes.append(
+                    sg.Cuboid(
+                        [0.045, 0.045, table_height - top_thickness],
+                        pose=SE3(centre_x + dx, centre_y + dy,
+                                 (table_height - top_thickness) / 2),
+                        color=grey
+                    )
+                )
+
+        # The OBJ files are split by material because STL doesn't retain colour
+        # and Swift/SpatialGeometry can render separate meshes with explicit colours.
+        mesh_dir = Path(__file__).resolve().parent / 'Assets' / 'EmergencyStop'
+        button_pose = SE3(centre_x, centre_y, table_height)
+        self.estop_button_shapes = [
+            sg.Mesh(str(mesh_dir / f'Emergency_stop_{name}.obj'),
+                    pose=button_pose, color=color)
+            for name, color in (
+                ('gray', [0.40, 0.42, 0.46, 1]),
+                ('yellow', [1.0, 0.80, 0.04, 1]),
+                ('red', [0.90, 0.05, 0.05, 1]),
+            )
+        ]
 
     def build_obstacle_and_curtain(self):
         # Collision demo object
@@ -95,6 +136,8 @@ class SceneMixin:
             self.abb.base_mesh,
             self.staubli.base_mesh,
             *self.stand_shapes,
+            *self.estop_table_shapes,
+            *self.estop_button_shapes,
             *self.props.values(),
             self.obstacle,
             *self.random_box_shapes,

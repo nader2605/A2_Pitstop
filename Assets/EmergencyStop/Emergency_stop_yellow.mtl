@@ -1,0 +1,7 @@
+newmtl yellow
+Ka 0.10 0.10 0.10
+Kd 1 0.8 0.04
+Ks 0.15 0.15 0.15
+Ns 16
+d 1.0
+illum 2

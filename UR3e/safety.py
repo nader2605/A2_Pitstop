@@ -69,5 +69,8 @@ def check_ur3e_path(ur3e, path, car_box, other_robots=()):
                 raise RuntimeError('UR3e/car clearance collision at step ' + str(step))
             for name, other in other_points:
                 for i in range(len(other)-1):
-                    if segment_distance(a, b, other[i], other[i+1]) < radius + 0.08:
+                    # KUKA links and lifter are wider than their joint centre-lines.
+                    # Add clearance for that larger geometry during the UR3e return sweep.
+                    clearance = 0.23 if 'kuka' in name.lower() else 0.08
+                    if segment_distance(a, b, other[i], other[i+1]) < radius + clearance:
                         raise RuntimeError('UR3e too close to ' + name + ' at step ' + str(step))
